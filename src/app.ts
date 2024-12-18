@@ -2,6 +2,7 @@ import express, { Application, Request, Response } from "express";
 import notFound from "./app/middlewares/notFound";
 import cors from 'cors';
 import { UserRoutes } from './app/modules/user/user.routes';
+import { BlogRoutes } from './app/modules/blog/blog.routes';
 const app: Application = express();
 
 // Parser
@@ -17,6 +18,7 @@ app.get('/', (req: Request, res: Response) => {
 
 // Application Routes
 app.use('/api/auth', UserRoutes);
+app.use('/api/blogs', BlogRoutes);
 // Global Middleware
 app.use(notFound);
 
