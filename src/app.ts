@@ -3,6 +3,7 @@ import notFound from "./app/middlewares/notFound";
 import cors from 'cors';
 import { UserRoutes } from './app/modules/user/user.routes';
 import { BlogRoutes } from './app/modules/blog/blog.routes';
+import globalErrorHandler from './app/middlewares/globalErrorHandler';
 const app: Application = express();
 
 // Parser
@@ -21,5 +22,5 @@ app.use('/api/auth', UserRoutes);
 app.use('/api/blogs', BlogRoutes);
 // Global Middleware
 app.use(notFound);
-
+app.use(globalErrorHandler);
 export default app;

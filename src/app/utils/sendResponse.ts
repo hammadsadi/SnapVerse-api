@@ -7,9 +7,9 @@ type TSuccessResponse<T> = {
   statusCode: number;
   data: T | T[] | null;
 };
-
+// Succes Response Function
 const sendResponse = <T>(res: Response, data: TSuccessResponse<T>) => {
-  res.status(400).json({
+  res.status(data.statusCode).json({
     success: true,
     message: data.message,
     statusCode: data.statusCode,

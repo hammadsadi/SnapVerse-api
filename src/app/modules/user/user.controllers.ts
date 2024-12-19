@@ -1,3 +1,7 @@
+import sendResponse from '../../utils/sendResponse';
+import catchAsync from '../../utils/catchAsync';
+import { UserServices } from './user.services';
+
 /**
  * @Desc User Create
  * @Params ""
@@ -5,24 +9,15 @@
  * @Return Data
  */
 
-import { Request, Response } from 'express';
-import sendResponse from '../../utils/sendResponse';
-
-const userCreate = async (req: Request, res: Response) => {
-  try {
-    sendResponse(res, {
-      success: true,
-      message: 'User registered successfully',
-      statusCode: 201,
-      data: null,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error,
-    });
-  }
-};
+const userCreate = catchAsync(async (req, res) => {
+  const result = await UserServices.userSaveToDB(req.body);
+  sendResponse(res, {
+    success: true,
+    message: 'User registered successfully',
+    statusCode: 201,
+    data: result,
+  });
+});
 
 export const UserControllers = {
   userCreate,
