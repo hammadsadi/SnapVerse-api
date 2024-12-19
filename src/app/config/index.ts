@@ -7,4 +7,6 @@ export default {
   DATABASE_URL: process.env.DATABASE_URL,
   NODE_ENV: process.env.NODE_ENV,
   BCRYPT_SOLT_ROUND: process.env.BCRYPT_SOLT_ROUND,
+  JWT_ACCESS_TOKEN: process.env.JWT_ACCESS_TOKEN,
+  JWT_ACCESS_TOKEN_EXPIRES_IN: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN,
 };

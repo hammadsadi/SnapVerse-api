@@ -12,5 +12,11 @@ router.post(
   validateRequest(UserValidationSchemas.createUserValidationSchema),
   UserControllers.userCreate,
 );
+// Register User
+router.post(
+  '/login',
+  validateRequest(UserValidationSchemas.UserLoginValidationSchema),
+  UserControllers.userLogin,
+);
 
 export const UserRoutes = router;
