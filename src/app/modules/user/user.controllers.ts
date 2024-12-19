@@ -6,13 +6,15 @@
  */
 
 import { Request, Response } from 'express';
+import sendResponse from '../../utils/sendResponse';
 
 const userCreate = async (req: Request, res: Response) => {
   try {
-    // console.log(req.body);
-    res.status(400).json({
-      success: false,
-      data: req.body,
+    sendResponse(res, {
+      success: true,
+      message: 'User registered successfully',
+      statusCode: 201,
+      data: null,
     });
   } catch (error) {
     res.status(400).json({
