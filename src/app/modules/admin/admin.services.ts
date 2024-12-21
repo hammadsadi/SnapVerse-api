@@ -1,3 +1,4 @@
+import AppError from '../../errors/AppError';
 import { Blog } from '../blog/blog.model';
 import { User } from '../user/user.model';
 
@@ -19,6 +20,11 @@ const blockUser = async (userId: string) => {
  * @Return Data
  */
 const deleteBlog = async (blogId: string) => {
+  const blog = await Blog.findById(blogId);
+  // Validation
+  if (!blog) {
+    throw new AppError(404, 'Blog Not Found!');
+  }
   const result = await Blog.findByIdAndDelete(blogId);
   return result;
 };
