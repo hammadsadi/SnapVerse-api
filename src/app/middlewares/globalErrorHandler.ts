@@ -1,48 +1,74 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextFunction, Request, Response } from 'express';
-import mongoose from 'mongoose';
-import { handleGenericError } from '../errors/handleGenericError';
-import { handleDuplicateError } from '../errors/handleDuplicateError';
-import { handleCastError } from '../errors/handleCastError';
-import { handleValidationError } from '../errors/handleValidationError';
-import { handleZodValidationError } from '../errors/handleZodError';
+/* eslint-disable no-unused-vars */
+import { ErrorRequestHandler } from 'express';
+import { ZodError } from 'zod';
+import { TErrorSources } from '../interface/error';
+import handleZodError from '../errors/handleZodError';
+import handleValidationError from '../errors/handleValidationError';
+import handleCastError from '../errors/handleCastError';
+import handleDuplicateError from '../errors/handleDuplicateError';
+import AppError from '../errors/AppError';
 
-/**
- *@ Types of Error
- *@1 Duplicate Error for Mongoose
- *@2 Validation Error for Mongoose
- *@3 Cast Error
- *@4  Zod Error
- */
+const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
+  // Setup Default Value
+  let statusCode = 500;
+  let message = 'Something Went Wrong';
 
-// Error Response Type
-type TErrorResponseType = {
-  success: boolean;
-  message: string;
-  statusCode: number;
-  error: any;
-  stack: string;
-};
-const globalErrorHandler = (
-  error: any,
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  // Cast Error
-  if (error.name && error.name === 'ZodError') {
-    handleZodValidationError(error, res);
-  } else if (error instanceof mongoose.Error.CastError) {
-    handleCastError(error, res);
-  } else if (error.code && error.code === 11000) {
-    handleDuplicateError(error, res);
-  } else if (error instanceof mongoose.Error.ValidationError) {
-    handleValidationError(error, res);
-  } else if (error instanceof Error) {
-    handleGenericError(error, res);
+  let error: TErrorSources = [
+    {
+      path: '',
+      message: 'Something Went Wrong',
+    },
+  ];
+
+  if (err instanceof ZodError) {
+    const simplifiedError = handleZodError(err);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    error = simplifiedError?.error;
+  } else if (err?.name === 'ValidationError') {
+    const simplifiedError = handleValidationError(err);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    error = simplifiedError?.error;
+  } else if (err?.name === 'CastError') {
+    const simplifiedError = handleCastError(err);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    error = simplifiedError?.error;
+  } else if (err?.code === 11000) {
+    const simplifiedError = handleDuplicateError(err);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    error = simplifiedError?.error;
+  } else if (err instanceof AppError) {
+    statusCode = err.statusCode;
+    message = err?.message;
+    error = [
+      {
+        path: '',
+        message: err?.message,
+      },
+    ];
+  } else if (err instanceof Error) {
+    message = err?.message;
+    error = [
+      {
+        path: '',
+        message: err?.message,
+      },
+    ];
   }
-};
 
+  if (error[0].path === '') {
+    console.log('Yes Path Empty');
+  }
+  res.status(statusCode).json({
+    success: false,
+    message,
+    statusCode,
+    error: error,
+    stack: err?.stack,
+  });
+};
 export default globalErrorHandler;

@@ -1,8 +1,7 @@
 import config from '../../config';
 import AppError from '../../errors/AppError';
-import { TUser } from './user.interface';
+import { TUser, TUserLogin } from './user.interface';
 import { User } from './user.model';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 /**
  * @Desc User Save To DB
@@ -25,9 +24,9 @@ const userSaveToDB = async (payload: TUser) => {
  * @Method POST
  * @Return Token
  */
-const userLogin = async (payload: Partial<TUser>) => {
+const userLogin = async (payload: TUserLogin) => {
   // Check User
-  const user = await User.findOne({ email: payload.email });
+  const user = await User.isUserExistByEmail(payload?.email);
   if (!user) {
     throw new AppError(401, 'Invalid credentials!');
   }
@@ -37,10 +36,11 @@ const userLogin = async (payload: Partial<TUser>) => {
   }
 
   // Check Password
-  const passCheck = await bcrypt.compare(
+  const passCheck = await User.isCheckPassword(
     payload?.password as string,
     user?.password,
   );
+
   if (!passCheck) {
     throw new AppError(401, 'Invalid credentials!');
   }

@@ -1,12 +1,22 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Response } from 'express';
+import mongoose from 'mongoose';
+import { TErrorSources, TGenericErrorResponse } from '../interface/error';
 
-export const handleCastError = (err: any, res: Response) => {
-  res.status(400).json({
-    success: false,
-    message: err.name,
-    statusCode: 400,
-    errors: err,
-    stack: err.stack,
-  });
+// Zod Error Handler
+const handleCastError = (
+  er: mongoose.Error.CastError,
+): TGenericErrorResponse => {
+  const error: TErrorSources = [
+    {
+      path: er?.path,
+      message: er?.message,
+    },
+  ];
+  const statusCode = 400;
+  return {
+    statusCode,
+    message: 'Invalid ID',
+    error,
+  };
 };
+
+export default handleCastError;

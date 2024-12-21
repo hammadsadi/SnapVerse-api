@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-this-alias */
 import { model, Schema } from 'mongoose';
-import { TUser } from './user.interface';
+import { TUser, UserModel } from './user.interface';
 import { UserRole } from './user.constant';
 import bcrypt from 'bcrypt';
 import config from '../../config';
-const userSchema = new Schema<TUser>(
+const userSchema = new Schema<TUser, UserModel>(
   {
     name: {
       type: String,
@@ -17,6 +18,7 @@ const userSchema = new Schema<TUser>(
     password: {
       type: String,
       required: true,
+      select: 0,
     },
     isBlocked: {
       type: Boolean,
@@ -43,4 +45,17 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-export const User = model<TUser>('User', userSchema);
+// Check User By Id
+userSchema.statics.isUserExistByEmail = async function (email: string) {
+  return await User.findOne({ email }).select('+password');
+};
+
+// Check Password
+userSchema.statics.isCheckPassword = async function (
+  myPlaintextPassword: string,
+  hashPass: string,
+) {
+  return await bcrypt.compare(myPlaintextPassword, hashPass);
+};
+
+export const User = model<TUser, UserModel>('User', userSchema);

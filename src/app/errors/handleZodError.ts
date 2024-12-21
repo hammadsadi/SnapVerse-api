@@ -1,12 +1,20 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Response } from 'express';
+import { ZodError, ZodIssue } from 'zod';
+import { TErrorSources, TGenericErrorResponse } from '../interface/error';
 
-export const handleZodValidationError = (err: any, res: Response) => {
-  res.status(400).json({
-    success: false,
-    message: err.name,
-    statusCode: 400,
-    errors: err,
-    stack: err.stack,
+// Zod Error Handler
+const handleZodError = (er: ZodError): TGenericErrorResponse => {
+  const error: TErrorSources = er.issues.map((issue: ZodIssue) => {
+    return {
+      path: issue?.path[issue.path.length - 1],
+      message: issue.message,
+    };
   });
+  const statusCode = 400;
+  return {
+    statusCode,
+    message: 'Validation Error',
+    error,
+  };
 };
+
+export default handleZodError;

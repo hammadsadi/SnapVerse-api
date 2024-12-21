@@ -1,11 +1,22 @@
-import { Response } from 'express';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { TErrorSources, TGenericErrorResponse } from '../interface/error';
 
-export const handleDuplicateError = (err: any, res: Response) => {
-  res.status(409).json({
-    success: false,
-    message: err.name,
-    statusCode: 409,
-    errors: err,
-    stack: err.stack,
-  });
+// Zod Error Handler
+const handleDuplicateError = (er: any): TGenericErrorResponse => {
+  const match = er.message.match(/"([^"]*)"/);
+  const extactMessage = match && match[1];
+  const error: TErrorSources = [
+    {
+      path: '',
+      message: `${extactMessage} Already Exist!`,
+    },
+  ];
+  const statusCode = 400;
+  return {
+    statusCode,
+    message: 'Duplicate Error',
+    error,
+  };
 };
+
+export default handleDuplicateError;

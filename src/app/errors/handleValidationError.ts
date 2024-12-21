@@ -1,12 +1,24 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Response } from 'express';
+import mongoose from 'mongoose';
+import { TErrorSources, TGenericErrorResponse } from '../interface/error';
 
-export const handleValidationError = (err: any, res: Response) => {
-  res.status(400).json({
-    success: false,
-    message: err.name,
-    statusCode: 400,
-    errors: err,
-    stack: err.stack,
-  });
+// Zod Error Handler
+const handleValidationError = (
+  er: mongoose.Error.ValidationError,
+): TGenericErrorResponse => {
+  const error: TErrorSources = Object.values(er.errors).map(
+    (val: mongoose.Error.ValidatorError | mongoose.Error.CastError) => {
+      return {
+        path: val.path,
+        message: val.message,
+      };
+    },
+  );
+  const statusCode = 400;
+  return {
+    statusCode,
+    message: 'Validation Error',
+    error,
+  };
 };
+
+export default handleValidationError;
