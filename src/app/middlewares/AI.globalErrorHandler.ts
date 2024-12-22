@@ -1,20 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-vars */
-import { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
+import { TErrorSources } from '../interface/error';
 import handleZodError from '../errors/handleZodError';
 import handleValidationError from '../errors/handleValidationError';
 import handleCastError from '../errors/handleCastError';
 import handleDuplicateError from '../errors/handleDuplicateError';
 import AppError from '../errors/AppError';
-import { TErrorSources } from '../interface/error';
+import { ErrorRequestHandler } from 'express';
 
 const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   // Setup Default Value
   let statusCode = 500;
   let message = 'Something Went Wrong';
-
-  let error: { path: string; message: string } | { details: TErrorSources } = {
+  let error:
+    | { path: string; message: string }
+    | { details: { path: string; message: string }[] } = {
     path: '',
     message: 'Something Went Wrong',
   };
@@ -24,7 +25,7 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
     error = {
-      details: simplifiedError?.error,
+      details: simplifiedError?.error, // Array of objects wrapped in an object
     };
   } else if (err?.name === 'ValidationError') {
     const simplifiedError = handleValidationError(err);
@@ -65,12 +66,13 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     };
   }
 
+  // Send the response
   res.status(statusCode).json({
     success: false,
     message,
     statusCode,
-    error: error,
-    stack: err?.stack,
+    error, // Object format for all errors
+    stack: process.env.NODE_ENV === 'production' ? undefined : err?.stack,
   });
 };
 export default globalErrorHandler;
