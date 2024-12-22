@@ -2,7 +2,6 @@
 /* eslint-disable no-unused-vars */
 import { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
-import { TErrorSources } from '../interface/error';
 import handleZodError from '../errors/handleZodError';
 import handleValidationError from '../errors/handleValidationError';
 import handleCastError from '../errors/handleCastError';
@@ -14,12 +13,12 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   let statusCode = 500;
   let message = 'Something Went Wrong';
 
-  let error: TErrorSources = [
-    {
-      path: '',
-      message: 'Something Went Wrong',
-    },
-  ];
+  let error:
+    | { path: string; message: string }
+    | { details: { path: string; message: string }[] } = {
+    path: '',
+    message: 'Something Went Wrong',
+  };
 
   if (err instanceof ZodError) {
     const simplifiedError = handleZodError(err);
@@ -67,7 +66,7 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     success: false,
     message,
     statusCode,
-    error: { error },
+    error: error,
     stack: err?.stack,
   });
 };

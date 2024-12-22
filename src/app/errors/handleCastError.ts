@@ -7,7 +7,7 @@ const handleCastError = (
 ): TGenericErrorResponse => {
   const error: TErrorSources = [
     {
-      path: er?.path,
+      path: String(er?.path),
       message: er?.message,
     },
   ];
